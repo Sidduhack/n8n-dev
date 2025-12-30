@@ -10,8 +10,8 @@ RUN curl -L --output /ttyd https://github.com/tsl0922/ttyd/releases/download/1.7
 FROM n8nio/n8n:latest
 USER root
 
-# Install curl permanently in the terminal for you to use
-RUN apk add --no-cache curl
+# Use apt-get because the latest n8n image is now Debian-based
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Copy the tools we downloaded in Stage 1
 COPY --from=builder /cloudflared /usr/local/bin/cloudflared
@@ -28,7 +28,7 @@ sleep 5\n\
 cloudflared tunnel --url http://localhost:7681\n" > /start.sh \
     && chmod +x /start.sh && chown node:node /start.sh
 
-# Reset Entrypoint and switch to node user
+# Reset Entrypoint and switch back to node user
 ENTRYPOINT []
 USER node
 
