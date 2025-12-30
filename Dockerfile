@@ -1,9 +1,10 @@
-FROM n8nio/n8n:latest
+# Use the Debian-based n8n image
+FROM n8nio/n8n:latest-debian
 
 USER root
 
-# Install dependencies for cloudflared on Alpine
-RUN apk add --no-cache curl libc6-compat
+# Install curl (using apt-get because this is Debian)
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Download and install the cloudflared binary
 RUN curl -L --output /usr/local/bin/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 && \
@@ -14,7 +15,7 @@ RUN echo '#!/bin/sh\n\
 n8n start &\n\
 cloudflared tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}' > /start.sh && chmod +x /start.sh
 
-# Render expects the app on port 5678 (or whatever you set N8N_PORT to)
+# Render expects the app on port 5678
 ENV N8N_PORT=5678
 EXPOSE 5678
 
